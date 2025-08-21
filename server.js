@@ -19,6 +19,7 @@ const orderSchema = new mongoose.Schema({
   time: { type: String, required: true },
   color: { type: String, required: true },
   copies: { type: Number, required: true },
+  pack: { type: Number, required: true },
   price: { type: Number, required: true },
   totalPrice: { type: Number, required: true },
   fileData: { type: String, required: true },

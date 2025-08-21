@@ -1086,6 +1086,11 @@
                   <span class="detail-label">จำนวน:</span>
                   <span class="detail-value">${order.copies || 0} แผ่น</span>
                 </div>
+                <div class="detail-item">
+                  <i class="fas fa-copy detail-icon"></i>
+                  <span class="detail-label">จำนวน:</span>
+                  <span class="detail-value">${order.pack || 0} ชุด</span>
+                </div>
                 
                 <div class="detail-item">
                   <i class="fas fa-money-bill-wave detail-icon"></i>
@@ -1220,6 +1225,7 @@
             order.time || '',
             order.color === 'color' ? 'สี' : 'ขาวดำ',
             order.copies || 0,
+            order.pack || 0,
             order.price || 0,
             order.totalPrice || 0,
             order.fileName || '',

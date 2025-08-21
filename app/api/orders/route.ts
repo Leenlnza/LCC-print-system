@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const name = formData.get("name") as string
     const major = formData.get("major") as string
     const copies = Number(formData.get("copies") as string)
+    const pack = Number(formData.get("pack") as string)
     const color = formData.get("color") as string
     const time = formData.get("time") as string
 
@@ -27,8 +28,9 @@ export async function POST(request: NextRequest) {
       time,
       color,
       copies,
+      pack,
       price: color === "color" ? 10 : 1,
-      totalPrice: copies * (color === "color" ? 10 : 1),
+      totalPrice: (copies * pack) * (color === "color" ? 10 : 1),
       fileName: file.name,
       fileType: file.type,
       fileData: `data:${file.type};base64,${fileData}`,
