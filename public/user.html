@@ -397,8 +397,6 @@
 
       <label for="copies">จำนวนแผ่น</label>
       <input type="number" id="copies" value="1" min="1" required />
-      <label for="pack">จำนวนชุด</label>
-      <input type="number" id="pack" value="1" min="1" required />
 
       <div class="summary" id="priceSummary">ราคารวม: - บาท</div>
 
@@ -450,7 +448,6 @@
     const slipPreview = document.getElementById('slipPreview');
     const slipImage = document.getElementById('slipImage');
     const copiesInput = document.getElementById('copies');
-    const packInput = document.getElementById('pack');
     const priceSummary = document.getElementById('priceSummary');
     const paymentSection = document.getElementById('paymentSection');
     const paymentAmount = document.getElementById('paymentAmount');
@@ -463,9 +460,8 @@
     function updatePrice() {
       const color = form.color.value;
       const copies = parseInt(copiesInput.value, 10) || 0;
-      const pack = parseInt(packInput.value, 10) || 0;
       const pricePer = color === 'color' ? 10 : color === 'bw' ? 1 : 0;
-      const totalPrice = (copies * pack) * pricePer;
+      const totalPrice = copies * pricePer;
       
       if (copies && pricePer) {
         priceSummary.textContent = `ราคารวม: ${totalPrice} บาท`;
@@ -564,7 +560,6 @@
       formData.append('time', document.getElementById('time').value);
       formData.append('color', form.color.value);
       formData.append('copies', copiesInput.value);
-      formData.append('pack', packInput.value);
       formData.append('file', fileInput.files[0]);
       formData.append('slip', selectedSlip);
 
