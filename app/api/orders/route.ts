@@ -9,12 +9,18 @@ export async function POST(request: NextRequest) {
     const name = formData.get("name") as string
     const major = formData.get("major") as string
     const copies = Number(formData.get("copies") as string)
-    const pack = Number(formData.get("pack") as string)
+    const packValue = formData.get("pack") as string
+    const pack = Number(packValue) || 1  // Default to 1 if invalid
     const color = formData.get("color") as string
     const time = formData.get("time") as string
 
+    // Add validation
     if (!file || !slip) {
       return NextResponse.json({ error: "Missing files" }, { status: 400 })
+    }
+
+    if (!pack || pack <= 0) {
+      return NextResponse.json({ error: "Pack must be a positive number" }, { status: 400 })
     }
 
     const { db } = await connectToDatabase()
@@ -39,6 +45,8 @@ export async function POST(request: NextRequest) {
       slipData: `data:${slip.type};base64,${slipData}`,
       createdAt: new Date().toISOString(),
     }
+
+    console.log("Pack value:", pack) // Debug log
 
     await db.collection("orders").insertOne(order)
 
