@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แดชบอร์ดแอดมิน - ระบบสั่งปริ้น</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fafc;
+      min-height: 100vh;
+      color: #334155;
+    }
+    
+    /* Header Styles */
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: white;
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .header-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .header-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+    
+    .logout-btn {
+      background: rgba(239, 68, 68, 0.8);
+    }
+    
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 1);
+    }
+    
+    /* Main Layout */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    /* Dashboard Stats */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent-color);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card.total { --accent-color: #3b82f6; }
+    .stat-card.revenue { --accent-color: #10b981; }
+    .stat-card.color { --accent-color: #f59e0b; }
+    .stat-card.bw { --accent-color: #6b7280; }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .stat-card.total .stat-icon { background: #3b82f6; }
+    .stat-card.revenue .stat-icon { background: #10b981; }
+    .stat-card.color .stat-icon { background: #f59e0b; }
+    .stat-card.bw .stat-icon { background: #6b7280; }
+    
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    /* Controls Section */
+    .controls-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 2rem;
+    }
+    
+    .controls-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .controls-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+    
+    .controls-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .control-btn {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+    
+    .control-btn.danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    
+    .control-btn.danger:hover {
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+    
+    .control-btn.success {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .control-btn.success:hover {
+      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Search and Filter */
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      transition: border-color 0.3s;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+    }
+    
+    .filter-select {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    
+    /* Orders Section */
+    .orders-section {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    
+    .orders-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    
+    .orders-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .orders-container {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    
+    /* Order Card */
+    .order-card {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .order-card:hover {
+      background: #f8fafc;
+    }
+    
+    .order-card:last-child {
+      border-bottom: none;
+    }
+    
+    .order-content {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    
+    /* File Preview */
+    .file-preview {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .file-preview img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .pdf-preview {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Slip Preview */
+    .slip-preview {
+      width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .slip-preview img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 2px solid #10b981;
+    }
+    
+    .slip-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #10b981;
+      text-align: center;
+    }
+    
+    .file-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .file-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+    }
+    
+    .file-btn:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+    
+    .file-btn.view {
+      background: #3b82f6;
+    }
+    
+    .file-btn.view:hover {
+      background: #2563eb;
+    }
+    
+    /* Order Details */
+    .order-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .detail-icon {
+      width: 20px;
+      color: #64748b;
+    }
+    
+    .detail-label {
+      font-weight: 500;
+      color: #475569;
+      min-width: 60px;
+    }
+    
+    .detail-value {
+      color: #1e293b;
+    }
+    
+    .price-highlight {
+      color: #ef4444;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    
+    .payment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .type-badge.color {
+      background: #fef3c7;
+      color: #d97706;
+    }
+    
+    .type-badge.bw {
+      background: #f3f4f6;
+      color: #374151;
+    }
+    
+    /* Order Actions */
+    .order-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    
+    .action-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .action-btn:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+    
+    .order-time {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+    
+    /* Loading and Empty States */
+    .loading-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f1f5f9;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    .auth-error {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #ef4444;
+    }
+    
+    .auth-error-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 1rem;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls-actions {
+        justify-content: center;
+      }
+      
+      .search-filter {
+        flex-direction: column;
+      }
+      
+      .order-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .order-actions {
+        align-items: center;
+      }
+      
+      .order-details {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Animation Classes */
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .slide-in {
+      animation: slideIn 0.6s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo">
+          <i class="fas fa-print"></i>
+          แดshboard แอดมิน
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="/" class="header-btn">
+          <i class="fas fa-home"></i>
+          หน้าแรก
+        </a>
+        <button class="header-btn logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Auth Error -->
+    <div class="auth-error" id="authError" style="display: none;">
+      <div class="auth-error-icon">🔒</div>
+      <h2>กรุณาเข้าสู่ระบบก่อนใช้งาน</h2>
+      <p>คุณต้องมีสิทธิ์แอดมินเพื่อเข้าถึงหน้านี้</p>
+      <br>
+      <a href="/admin-login.html" class="control-btn">
+        <i class="fas fa-lock"></i>
+        เข้าสู่ระบบ
+      </a>
+    </div>
+    
+    <!-- Admin Content -->
+    <div id="adminContent" style="display: none;">
+      <!-- Dashboard Stats -->
+      <div class="dashboard-stats fade-in">
+        <div class="stat-card total">
+          <div class="stat-header">
+            <div>
+              <div class="stat-number" id="totalOrders">0</div>
+              <div class="stat-label">รายการทั้งหมด</div>
+            </div>
+            <div class="stat-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card revenue">
+          <div class="stat-header">
+            <div>
+              <div class="stat-number" id="totalRevenue">0</div>
+              <div class="stat-label">รายได้รวม (บาท)</div>
+            </div>
+            <div class="stat-icon">
+              <i class="fas fa-coins"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card color">
+          <div class="stat-header">
+            <div>
+              <div class="stat-number" id="colorOrders">0</div>
+              <div class="stat-label">ปริ้นสี</div>
+            </div>
+            <div class="stat-icon">
+              <i class="fas fa-palette"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="stat-card bw">
+          <div class="stat-header">
+            <div>
+              <div class="stat-number" id="bwOrders">0</div>
+              <div class="stat-label">ปริ้นขาวดำ</div>
+            </div>
+            <div class="stat-icon">
+              <i class="fas fa-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls Section -->
+      <div class="controls-section fade-in">
+        <div class="controls-header">
+          <h2 class="controls-title">
+            <i class="fas fa-cogs"></i>
+            การจัดการ
+          </h2>
+          <div class="controls-actions">
+            <button class="control-btn" id="refreshBtn">
+              <i class="fas fa-sync-alt"></i>
+              รีเฟรช
+            </button>
+            <button class="control-btn success" id="exportBtn">
+              <i class="fas fa-download"></i>
+              ส่งออกข้อมูล
+            </button>
+            <button class="control-btn danger" id="clearAllBtn">
+              <i class="fas fa-trash-alt"></i>
+              ลบทั้งหมด
+            </button>
+          </div>
+        </div>
+        
+        <!-- Search and Filter -->
+        <div class="search-filter">
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="ค้นหาตามชื่อ, สาขา, หรือไฟล์...">
+          </div>
+          <select class="filter-select" id="typeFilter">
+            <option value="">ทุกประเภท</option>
+            <option value="color">ปริ้นสี</option>
+            <option value="bw">ปริ้นขาวดำ</option>
+          </select>
+          <select class="filter-select" id="timeFilter">
+            <option value="">ทุกเวลา</option>
+            <option value="11:15">11:15 น.</option>
+            <option value="12:15">12:15 น.</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Orders Section -->
+      <div class="orders-section fade-in">
+        <div class="orders-header">
+          <h2 class="orders-title">
+            <i class="fas fa-list"></i>
+            รายการสั่งปริ้น
+            <span id="orderCount">(0)</span>
+          </h2>
+        </div>
+        
+        <div class="orders-container" id="ordersContainer">
+          <!-- Loading State -->
+          <div class="loading-state" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    // Global variables
+    let allOrders = [];
+    let filteredOrders = [];
+
+    // DOM elements
+    const authError = document.getElementById('authError');
+    const adminContent = document.getElementById('adminContent');
+    const loadingState = document.getElementById('loadingState');
+    const ordersContainer = document.getElementById('ordersContainer');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const timeFilter = document.getElementById('timeFilter');
+
+    // Authentication functions
+    function checkAuth() {
+      const token = localStorage.getItem('adminToken');
+      console.log('Checking auth, token:', token ? 'exists' : 'not found');
+      
+      if (!token) {
+        authError.style.display = 'block';
+        adminContent.style.display = 'none';
+        return false;
+      }
+      authError.style.display = 'none';
+      adminContent.style.display = 'block';
+      return token;
+    }
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem('adminToken');
+      return {
+        'Authorization': `Basic ${token}`,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    // Logout function
+    logoutBtn.addEventListener('click', async () => {
+      const result = await Swal.fire({
+        title: 'ออกจากระบบ?',
+        text: 'คุณต้องการออกจากระบบหรือไม่?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'ออกจากระบบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+
+      if (result.isConfirmed) {
+        localStorage.removeItem('adminToken');
+        await Swal.fire({
+          title: 'ออกจากระบบแล้ว',
+          text: 'กำลังเปลี่ยนเส้นทาง...',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        window.location.href = '/admin-login.html';
+      }
+    });
+
+    // Load orders function
+    async function loadOrders() {
+      const token = checkAuth();
+      if (!token) return;
+
+      try {
+        console.log('Loading orders...');
+        loadingState.style.display = 'block';
+        
+        const response = await fetch('/api/orders', {
+          headers: getAuthHeaders()
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.status === 401) {
+          console.log('Unauthorized, removing token');
+          localStorage.removeItem('adminToken');
+          authError.style.display = 'block';
+          adminContent.style.display = 'none';
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Orders loaded:', data.length, 'orders');
+        
+        allOrders = data;
+        filteredOrders = [...allOrders];
+        
+        updateStats(allOrders);
+        renderOrders(filteredOrders);
+        
+      } catch (error) {
+        console.error('Error loading orders:', error);
+        ordersContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <h3>เกิดข้อผิดพลาด</h3>
+            <p>ไม่สามารถโหลดข้อมูลได้: ${error.message}</p>
+            <button class="control-btn" onclick="loadOrders()" style="margin-top: 1rem;">
+              <i class="fas fa-retry"></i>
+              ลองใหม่
+            </button>
+          </div>
+        `;
+      } finally {
+        loadingState.style.display = 'none';
+      }
+    }
+
+    // Update statistics
+    function updateStats(orders) {
+      console.log('Updating stats for', orders.length, 'orders');
+      
+      const totalOrders = orders.length;
+      const totalRevenue = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+      const colorOrders = orders.filter(order => order.color === 'color').length;
+      const bwOrders = orders.filter(order => order.color === 'bw').length;
+
+      // Animate numbers
+      animateNumber('totalOrders', totalOrders);
+      animateNumber('totalRevenue', totalRevenue);
+      animateNumber('colorOrders', colorOrders);
+      animateNumber('bwOrders', bwOrders);
+    }
+
+    // Animate number counting
+    function animateNumber(elementId, targetValue) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      
+      const startValue = 0;
+      const duration = 1000;
+      const startTime = performance.now();
+
+      function updateNumber(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentValue = Math.floor(startValue + (targetValue - startValue) * progress);
+        
+        if (elementId === 'totalRevenue') {
+          element.textContent = currentValue.toLocaleString();
+        } else {
+          element.textContent = currentValue;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(updateNumber);
+        }
+      }
+
+      requestAnimationFrame(updateNumber);
+    }
+
+    // Render orders
+    function renderOrders(orders) {
+      console.log('Rendering', orders.length, 'orders');
+      const container = ordersContainer;
+      
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>ไม่มีรายการสั่งปริ้น</h3>
+            <p>ยังไม่มีรายการสั่งปริ้นในระบบ</p>
+          </div>
+        `;
+        document.getElementById('orderCount').textContent = '(0)';
+        return;
+      }
+
+      document.getElementById('orderCount').textContent = `(${orders.length})`;
+      
+      container.innerHTML = orders.map(order => {
+        // Handle missing slip data for backward compatibility
+        const hasSlip = order.slipData && order.slipName;
+        
+        return `
+          <div class="order-card slide-in">
+            <div class="order-content">
+              <!-- File Preview -->
+              <div class="file-preview">
+                ${order.fileType && order.fileType.startsWith('image/') ? `
+                  <img src="${order.fileData}" alt="รูปจากผู้ใช้" />
+                ` : `
+                  <div class="pdf-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF
+                  </div>
+                `}
+                <div class="file-actions">
+                  ${order.fileType && order.fileType.startsWith('image/') ? `
+                    <button class="file-btn" onclick="downloadFile('${order.fileData}', '${order.fileName}')">
+                      <i class="fas fa-download"></i>
+                      ดาวน์โหลด
+                    </button>
+                  ` : `
+                    <button class="file-btn view" onclick="window.open('${order.fileData}', '_blank')">
+                      <i class="fas fa-eye"></i>
+                      เปิดดู
+                    </button>
+                    <button class="file-btn" onclick="downloadFile('${order.fileData}', '${order.fileName}')">
+                      <i class="fas fa-download"></i>
+                      ดาวน์โหลด
+                    </button>
+                  `}
+                </div>
+              </div>
+
+              <!-- Payment Slip Preview -->
+              ${hasSlip ? `
+                <div class="slip-preview">
+                  <img src="${order.slipData}" alt="สลิปการโอนเงิน" />
+                  <div class="slip-label">💳 สลิปการโอน</div>
+                  <div class="file-actions">
+                    <button class="file-btn" onclick="downloadFile('${order.slipData}', '${order.slipName}')">
+                      <i class="fas fa-download"></i>
+                      ดาวน์โหลด
+                    </button>
+                  </div>
+                </div>
+              ` : `
+                <div class="slip-preview">
+                  <div style="width: 100%; height: 120px; background: #f3f4f6; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #6b7280;">
+                    <div style="text-align: center;">
+                      <i class="fas fa-receipt" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                      <div style="font-size: 0.8rem;">ไม่มีสลิป</div>
+                    </div>
+                  </div>
+                  <div class="slip-label">💳 ไม่มีสลิปการโอน</div>
+                </div>
+              `}
+
+              <!-- Order Details -->
+              <div class="order-details">
+                <div class="detail-item">
+                  <i class="fas fa-user detail-icon"></i>
+                  <span class="detail-label">ชื่อ:</span>
+                  <span class="detail-value">${order.name || 'ไม่ระบุ'}</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-graduation-cap detail-icon"></i>
+                  <span class="detail-label">สาขา:</span>
+                  <span class="detail-value">${order.major || 'ไม่ระบุ'}</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-clock detail-icon"></i>
+                  <span class="detail-label">เวลา:</span>
+                  <span class="detail-value">${order.time || 'ไม่ระบุ'} น.</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-print detail-icon"></i>
+                  <span class="detail-label">ประเภท:</span>
+                  <span class="type-badge ${order.color}">
+                    ${order.color === 'color' ? '🎨 สี' : '⚫ ขาวดำ'}
+                    (${order.price || 0} บาท/แผ่น)
+                  </span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-copy detail-icon"></i>
+                  <span class="detail-label">จำนวน:</span>
+                  <span class="detail-value">${order.copies || 0} แผ่น</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-money-bill-wave detail-icon"></i>
+                  <span class="detail-label">รวม:</span>
+                  <span class="detail-value price-highlight">${order.totalPrice || 0} บาท</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-file detail-icon"></i>
+                  <span class="detail-label">ไฟล์:</span>
+                  <span class="detail-value">${order.fileName || 'ไม่ระบุ'}</span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-credit-card detail-icon"></i>
+                  <span class="detail-label">การชำระ:</span>
+                  <span class="payment-badge">
+                    <i class="fas fa-${hasSlip ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${hasSlip ? 'ชำระแล้ว' : 'ไม่มีสลิป'}
+                  </span>
+                </div>
+                
+                <div class="detail-item">
+                  <i class="fas fa-info-circle detail-icon"></i>
+                  <span class="detail-label">สถานะ:</span>
+                  <span class="status-badge">
+                    <i class="fas fa-hourglass-half"></i>
+                    รอดำเนินการ
+                  </span>
+                </div>
+              </div>
+
+              <!-- Order Actions -->
+              <div class="order-actions">
+                <button class="action-btn" onclick="deleteOrder('${order._id}')">
+                  <i class="fas fa-trash"></i>
+                  ลบ
+                </button>
+                <div class="order-time">
+                  <i class="fas fa-calendar-alt"></i>
+                  ${new Date(order.createdAt).toLocaleString('th-TH')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Delete order function
+    async function deleteOrder(orderId) {
+      try {
+        const result = await Swal.fire({
+          title: 'ลบรายการนี้หรือไม่?',
+          text: "หากลบแล้วจะไม่สามารถกู้คืนได้!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'ใช่, ลบเลย!',
+          cancelButtonText: 'ยกเลิก'
+        });
+
+        if (result.isConfirmed) {
+          const response = await fetch(`/api/orders/${orderId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+
+          if (response.ok) {
+            await Swal.fire({
+              title: 'ลบแล้ว!',
+              text: 'รายการถูกลบเรียบร้อยแล้ว',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            loadOrders();
+          } else {
+            throw new Error('ไม่สามารถลบรายการได้');
+          }
+        }
+      } catch (error) {
+        await Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
+      }
+    }
+
+    // Download file function
+    function downloadFile(dataUrl, filename) {
+      try {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (error) {
+        console.error('Download error:', error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถดาวน์โหลดไฟล์ได้', 'error');
+      }
+    }
+
+    // Filter functions
+    function filterOrders() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const typeValue = typeFilter.value;
+      const timeValue = timeFilter.value;
+
+      filteredOrders = allOrders.filter(order => {
+        const matchesSearch = 
+          (order.name || '').toLowerCase().includes(searchTerm) ||
+          (order.major || '').toLowerCase().includes(searchTerm) ||
+          (order.fileName || '').toLowerCase().includes(searchTerm);
+        
+        const matchesType = !typeValue || order.color === typeValue;
+        const matchesTime = !timeValue || order.time === timeValue;
+
+        return matchesSearch && matchesType && matchesTime;
+      });
+
+      renderOrders(filteredOrders);
+    }
+
+    // Export data function
+    function exportData() {
+      try {
+        const csvContent = [
+          ['ชื่อ', 'สาขา', 'เวลา', 'ประเภท', 'จำนวน', 'ราคา', 'รวม', 'ไฟล์', 'การชำระ', 'วันที่'],
+          ...allOrders.map(order => [
+            order.name || '',
+            order.major || '',
+            order.time || '',
+            order.color === 'color' ? 'สี' : 'ขาวดำ',
+            order.copies || 0,
+            order.price || 0,
+            order.totalPrice || 0,
+            order.fileName || '',
+            (order.slipData && order.slipName) ? 'ชำระแล้ว' : 'ไม่มีสลิป',
+            new Date(order.createdAt).toLocaleString('th-TH')
+          ])
+        ].map(row => row.join(',')).join('\n');
+
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `print-orders-${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        
+        Swal.fire({
+          title: 'ส่งออกข้อมูลสำเร็จ!',
+          text: 'ไฟล์ CSV ถูกดาวน์โหลดแล้ว',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        console.error('Export error:', error);
+        Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถส่งออกข้อมูลได้', 'error');
+      }
+    }
+
+    // Clear all orders function
+    clearAllBtn.addEventListener('click', async () => {
+      try {
+        const result = await Swal.fire({
+          title: 'ลบทั้งหมดหรือไม่?',
+          text: "หากลบแล้วจะไม่สามารถกู้คืนได้!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#ef4444',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'ใช่, ลบเลย!',
+          cancelButtonText: 'ยกเลิก'
+        });
+
+        if (result.isConfirmed) {
+          const response = await fetch('/api/orders', {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+
+          if (response.ok) {
+            await Swal.fire({
+              title: 'ลบแล้ว!',
+              text: 'รายการทั้งหมดถูกลบเรียบร้อยแล้ว',
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            loadOrders();
+          } else {
+            throw new Error('ไม่สามารถลบรายการได้');
+          }
+        }
+      } catch (error) {
+        await Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
+      }
+    });
+
+    // Event listeners
+    refreshBtn.addEventListener('click', loadOrders);
+    exportBtn.addEventListener('click', exportData);
+    searchInput.addEventListener('input', filterOrders);
+    typeFilter.addEventListener('change', filterOrders);
+    timeFilter.addEventListener('change', filterOrders);
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, checking auth...');
+      if (checkAuth()) {
+        console.log('Auth passed, loading orders...');
+        loadOrders();
+      } else {
+        console.log('Auth failed, showing login form');
+      }
+    });
+
+    // Auto refresh every 30 seconds
+    setInterval(() => {
+      if (checkAuth()) {
+        console.log('Auto refresh - loading orders...');
+        loadOrders();
+      }
+    }, 30000);
+
+    // Add debugging info
+    console.log('Admin script loaded');
+  </script>
+</body>
+</html>

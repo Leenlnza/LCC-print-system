@@ -1,0 +1,26 @@
+// server.js หรือไฟล์ backend ของคุณ
+const express = require("express")
+const app = express()
+app.use(express.json())
+
+// กำหนดรหัสผ่าน admin
+const ADMIN_USERNAME = "admin"
+const ADMIN_PASSWORD = "admin123"
+
+// Route login
+app.post("/api/admin/login", (req, res) => {
+  const { username, password } = req.body
+
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    return res.json({
+      success: true,
+      message: "เข้าสู่ระบบสำเร็จ",
+      token: Buffer.from(`${username}:${password}`).toString("base64"),
+    })
+  }
+
+  res.status(401).json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" })
+})
+
+// เริ่ม server
+app.listen(3000, () => console.log("Server running on http://localhost:3000"))

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>สั่งปริ้นภาพหรือ PDF</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #1e88e5, #1565c0);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    main {
+      max-width: 500px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    label {
+      display: block;
+      margin-top: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+    
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #1e88e5;
+    }
+    
+    .radio-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .radio-group label {
+      font-weight: normal;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .radio-group input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+    
+    input[type="file"] {
+      width: 100%;
+      padding: 0.8rem;
+      border: 2px dashed #e0e0e0;
+      border-radius: 8px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+    
+    input[type="file"]:hover {
+      border-color: #1e88e5;
+    }
+    
+    .summary {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-weight: bold;
+      color: #1e88e5;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    
+    /* Payment Section */
+    .payment-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border: 2px solid #e3f2fd;
+      text-align: center;
+    }
+    
+    .payment-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1e88e5;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .qr-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+    }
+    
+    .bank-info {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .bank-info h4 {
+      color: #1565c0;
+      margin-bottom: 0.5rem;
+    }
+    
+    .bank-info p {
+      margin: 0.3rem 0;
+      color: #333;
+    }
+    
+    .slip-upload {
+      margin-top: 1rem;
+    }
+    
+    .slip-preview {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    
+    .slip-preview img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .required-note {
+      background: #fff3e0;
+      border: 1px solid #ffb74d;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #e65100;
+      font-size: 0.9rem;
+    }
+    
+    button {
+      margin-top: 2rem;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #1e88e5, #1565c0);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    button:hover::before {
+      left: 100%;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(30, 136, 229, 0.3);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+      color: #666;
+    }
+    
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #1e88e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    #previewImage {
+      margin-top: 1rem;
+      max-width: 100%;
+      border-radius: 8px;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .back-btn {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+    
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .step.active {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    
+    .step.completed {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+    
+    .step.inactive {
+      background: #f5f5f5;
+      color: #999;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="back-btn">← กลับหน้าแรก</a>
+    <h1>📝 แบบฟอร์มสั่งปริ้นภาพหรือ PDF</h1>
+  </header>
+
+  <main>
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step active" id="step1">
+        <span>1️⃣</span>
+        <span>กรอกข้อมูล</span>
+      </div>
+      <div class="step inactive" id="step2">
+        <span>💰</span>
+        <span>ชำระเงิน</span>
+      </div>
+      <div class="step inactive" id="step3">
+        <span>✅</span>
+        <span>เสร็จสิ้น</span>
+      </div>
+    </div>
+
+    <form id="orderForm">
+      <label for="name">ชื่อ - นามสกุล</label>
+      <input type="text" id="name" required placeholder="กรอกชื่อ-นามสกุล" />
+      
+      <label for="major">สาขาที่เรียน</label>
+      <select id="major" required>
+        <option value="">-- เลือกสาขา --</option>
+        <option value="สาขาการบัญชี">สาขาการบัญชี</option>
+        <option value="สาขาการตลาด">สาขาการตลาด</option>
+        <option value="สาขาเทคโนโลยีธุรกิจดิจิทัล">สาขาเทคโนโลยีธุรกิจดิจิทัล</option>
+        <option value="สาขาภาษาต่างประเทศ">สาขาภาษาต่างประเทศ</option>
+        <option value="สาขาธุรกิจค้าปลีก">สาขาธุรกิจค้าปลีก</option>
+        <option value="สาขาท่องเที่ยว">สาขาท่องเที่ยว</option>
+        <option value="สาขาโรงแรม">สาขาโรงแรม</option>
+        <option value="สาขาอุตสาหกรรมบันเทิง">สาขาอุตสาหกรรมบันเทิง</option>
+      </select>
+      
+      <label for="time">เวลาไปรับงาน</label>
+      <select id="time" required>
+        <option value="">-- เลือกเวลา --</option>
+        <option value="11:15">11:15 น.</option>
+        <option value="12:15">12:15 น.</option>
+      </select>
+      
+      <label>เลือกประเภทการปริ้น</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="color" value="color" required />
+          สี (10 บาท/แผ่น)
+        </label>
+        <label>
+          <input type="radio" name="color" value="bw" required />
+          ขาวดำ (1 บาท/แผ่น)
+        </label>
+      </div>
+
+      <label for="fileInput">อัปโหลดไฟล์ (รูปภาพหรือ PDF)</label>
+      <input type="file" id="fileInput" accept="image/*,application/pdf" required />
+      <img id="previewImage" />
+
+      <label for="copies">จำนวนแผ่น</label>
+      <input type="number" id="copies" value="1" min="1" required />
+
+      <div class="summary" id="priceSummary">ราคารวม: - บาท</div>
+
+      <!-- Payment Section -->
+      <div class="payment-section" id="paymentSection" style="display: none;">
+        <div class="payment-title">
+          💳 ชำระเงินผ่าน QR Code
+        </div>
+        
+        <div class="qr-container">
+          <div class="qr-code" id="qrCode">
+            <!-- QR Code will be generated here -->
+          </div>
+          
+          <div class="bank-info">
+            <h4>🏦 ข้อมูลการโอน</h4>
+            <p><strong>ธนาคาร:</strong> กสิกรไทย</p>
+            <p><strong>เลขบัญชี:</strong> 123-4-56789-0</p>
+            <p><strong>ชื่อบัญชี:</strong> ร้านปริ้นเอกสาร</p>
+            <p><strong>จำนวนเงิน:</strong> <span id="paymentAmount">0</span> บาท</p>
+          </div>
+        </div>
+
+        <div class="slip-upload">
+          <label for="slipInput">📎 แนบสลิปการโอนเงิน (จำเป็น)</label>
+          <input type="file" id="slipInput" accept="image/*" required />
+          <div class="slip-preview" id="slipPreview" style="display: none;">
+            <img id="slipImage" />
+            <p style="margin-top: 0.5rem; color: #2e7d32; font-weight: 500;">✅ แนบสลิปเรียบร้อยแล้ว</p>
+          </div>
+        </div>
+
+        <div class="required-note">
+          <strong>⚠️ หมายเหตุ:</strong> กรุณาโอนเงินตามจำนวนที่แสดงและแนบสลิปการโอนก่อนกดส่งคำสั่ง
+        </div>
+      </div>
+      
+      <div class="loading" id="loading">กำลังส่งคำสั่ง...</div>
+      
+      <button type="submit" id="submitBtn">🖨️ ส่งคำสั่งปริ้น</button>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('orderForm');
+    const fileInput = document.getElementById('fileInput');
+    const slipInput = document.getElementById('slipInput');
+    const previewImage = document.getElementById('previewImage');
+    const slipPreview = document.getElementById('slipPreview');
+    const slipImage = document.getElementById('slipImage');
+    const copiesInput = document.getElementById('copies');
+    const priceSummary = document.getElementById('priceSummary');
+    const paymentSection = document.getElementById('paymentSection');
+    const paymentAmount = document.getElementById('paymentAmount');
+    const qrCode = document.getElementById('qrCode');
+    const loading = document.getElementById('loading');
+    const submitBtn = document.getElementById('submitBtn');
+
+    let selectedSlip = null;
+
+    function updatePrice() {
+      const color = form.color.value;
+      const copies = parseInt(copiesInput.value, 10) || 0;
+      const pricePer = color === 'color' ? 10 : color === 'bw' ? 1 : 0;
+      const totalPrice = copies * pricePer;
+      
+      if (copies && pricePer) {
+        priceSummary.textContent = `ราคารวม: ${totalPrice} บาท`;
+        priceSummary.style.background = '#e8f5e8';
+        priceSummary.style.color = '#2e7d32';
+        
+        // Show payment section and generate QR code
+        paymentSection.style.display = 'block';
+        paymentAmount.textContent = totalPrice;
+        generateQRCode(totalPrice);
+        
+        // Update step indicator
+        document.getElementById('step1').className = 'step completed';
+        document.getElementById('step2').className = 'step active';
+      } else {
+        priceSummary.textContent = 'ราคารวม: - บาท';
+        priceSummary.style.background = '#f8f9fa';
+        priceSummary.style.color = '#1e88e5';
+        paymentSection.style.display = 'none';
+        
+        // Reset step indicator
+        document.getElementById('step1').className = 'step active';
+        document.getElementById('step2').className = 'step inactive';
+      }
+    }
+
+    function generateQRCode(amount) {
+      // Generate PromptPay QR Code
+      const promptPayID = '0123456789'; // Replace with actual PromptPay ID
+      const qrData = `00020101021129370016A000000677010111011${promptPayID.length.toString().padStart(2, '0')}${promptPayID}5303764540${amount.toFixed(2).length.toString().padStart(2, '0')}${amount.toFixed(2)}5802TH6304`;
+      
+      // Clear previous QR code
+      qrCode.innerHTML = '';
+      
+      // Generate QR code
+      QRCode.toCanvas(qrData, { width: 180, margin: 1 }, (error, canvas) => {
+        if (error) {
+          console.error('QR Code generation error:', error);
+          qrCode.innerHTML = '<p style="color: #e53935;">ไม่สามารถสร้าง QR Code ได้</p>';
+        } else {
+          qrCode.appendChild(canvas);
+        }
+      });
+    }
+
+    form.addEventListener('input', updatePrice);
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImage.style.display = 'none';
+      }
+    });
+
+    slipInput.addEventListener('change', () => {
+      const file = slipInput.files[0];
+      if (file && file.type.startsWith('image/')) {
+        selectedSlip = file;
+        const reader = new FileReader();
+        reader.onload = e => {
+          slipImage.src = e.target.result;
+          slipPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        selectedSlip = null;
+        slipPreview.style.display = 'none';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Check if slip is uploaded
+      if (!selectedSlip) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'กรุณาแนบสลิปการโอนเงิน',
+          text: 'คุณต้องแนบสลิปการโอนเงินก่อนส่งคำสั่งปริ้น',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#f59e0b'
+        });
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('major', document.getElementById('major').value);
+      formData.append('time', document.getElementById('time').value);
+      formData.append('color', form.color.value);
+      formData.append('copies', copiesInput.value);
+      formData.append('file', fileInput.files[0]);
+      formData.append('slip', selectedSlip);
+
+      loading.style.display = 'block';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          // Update step indicator
+          document.getElementById('step2').className = 'step completed';
+          document.getElementById('step3').className = 'step active';
+          
+          await Swal.fire({
+            icon: 'success',
+            title: 'ส่งคำสั่งปริ้นเสร็จสิ้น! 🎉',
+            html: `
+              <p>✅ ได้รับการชำระเงินแล้ว</p>
+              <p><strong>เวลารับงาน:</strong> ${document.getElementById('time').value} น.</p>
+              <p><strong>สถานที่:</strong> ตึกสำนักงานชั้นสองห้องพักครู (ตึกคอม)</p>
+              <p style="color: #2e7d32; font-weight: bold;">กรุณาเก็บหลักฐานการโอนเงินไว้</p>
+            `,
+            confirmButtonText: 'รับทราบ',
+            confirmButtonColor: '#1e88e5'
+          });
+          
+          form.reset();
+          previewImage.style.display = 'none';
+          slipPreview.style.display = 'none';
+          paymentSection.style.display = 'none';
+          selectedSlip = null;
+          updatePrice();
+          
+          // Reset step indicator
+          document.getElementById('step1').className = 'step active';
+          document.getElementById('step2').className = 'step inactive';
+          document.getElementById('step3').className = 'step inactive';
+        } else {
+          throw new Error(result.error || 'เกิดข้อผิดพลาด');
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message,
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#e53935'
+        });
+      } finally {
+        loading.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
