@@ -3,30 +3,42 @@ import { connectToDatabase } from "@/lib/mongodb"
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Starting POST request processing...")
+    
     const formData = await request.formData()
+    console.log("FormData received")
+    
     const file = formData.get("file") as File
     const slip = formData.get("slip") as File
     const name = formData.get("name") as string
     const major = formData.get("major") as string
     const copies = Number(formData.get("copies") as string)
     const packValue = formData.get("pack") as string
-    const pack = Number(packValue) || 1  // Default to 1 if invalid
+    const pack = Number(packValue) || 1
     const color = formData.get("color") as string
     const time = formData.get("time") as string
 
+    console.log("Form data extracted:", { name, major, copies, pack, color, time })
+
     // Add validation
     if (!file || !slip) {
+      console.log("Missing files error")
       return NextResponse.json({ error: "Missing files" }, { status: 400 })
     }
 
     if (!pack || pack <= 0) {
+      console.log("Invalid pack error")
       return NextResponse.json({ error: "Pack must be a positive number" }, { status: 400 })
     }
 
+    console.log("Connecting to database...")
     const { db } = await connectToDatabase()
+    console.log("Database connected successfully")
 
+    console.log("Processing files...")
     const fileData = Buffer.from(await file.arrayBuffer()).toString("base64")
     const slipData = Buffer.from(await slip.arrayBuffer()).toString("base64")
+    console.log("Files processed successfully")
 
     const order = {
       name,
@@ -46,13 +58,17 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     }
 
-    console.log("Pack value:", pack) // Debug log
-
+    console.log("Inserting order into database...")
     await db.collection("orders").insertOne(order)
+    console.log("Order inserted successfully")
 
     return NextResponse.json({ message: "Order created", order }, { status: 201 })
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
+    console.error("Detailed error:", error)
+    console.error("Error stack:", error.stack)
+    return NextResponse.json({ 
+      error: "Failed to create order", 
+      details: error.message 
+    }, { status: 500 })
   }
 }
