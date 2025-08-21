@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const name = formData.get("name") as string
     const major = formData.get("major") as string
     const copies = Number(formData.get("copies") as string)
-    const packValue = formData.get("pack") as string
+    const packValue = formData.get("pack")
+    console.log("Raw pack value:", packValue, typeof packValue)
     const pack = Number(packValue) || 1
     const color = formData.get("color") as string
     const time = formData.get("time") as string
