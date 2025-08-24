@@ -414,8 +414,8 @@
         
         <div class="qr-container">
           <div class="qr-code" id="qrCode">
-            <!-- QR Code will be generated here -->
-          </div>
+  <img id="qrCodeImage" src="" alt="QR Code" />
+</div>
           
           <div class="bank-info">
             <h4>🏦 ข้อมูลการโอน</h4>
@@ -486,6 +486,8 @@
     paymentSection.style.display = 'block';
     paymentAmount.textContent = totalPrice;
     generateQRCode(totalPrice);
+    qrCodeImage.src = '/qr-codes/payment.jpg'; // ใส่ path ไฟล์ PNG ของคุณ
+    qrCodeImage.style.display = 'block';
 
     document.getElementById('step1').className = 'step completed';
     document.getElementById('step2').className = 'step active';
@@ -501,23 +503,11 @@
 }
 
     function generateQRCode(amount) {
-      // Generate PromptPay QR Code
-      const promptPayID = '0123456789'; // Replace with actual PromptPay ID
-      const qrData = `00020101021129370016A000000677010111011${promptPayID.length.toString().padStart(2, '0')}${promptPayID}5303764540${amount.toFixed(2).length.toString().padStart(2, '0')}${amount.toFixed(2)}5802TH6304`;
-      
-      // Clear previous QR code
-      qrCode.innerHTML = '';
-      
-      // Generate QR code
-      QRCode.toCanvas(qrData, { width: 180, margin: 1 }, (error, canvas) => {
-        if (error) {
-          console.error('QR Code generation error:', error);
-          qrCode.innerHTML = '<p style="color: #e53935;">ไม่สามารถสร้าง QR Code ได้</p>';
-        } else {
-          qrCode.appendChild(canvas);
-        }
-      });
-    }
+  // ใช้ไฟล์ PNG คงที่แทน QR code dynamic
+  const qrCodeImage = document.getElementById('qrCodeImage');
+  qrCodeImage.src = '/qr-codes/payment.jpg'; // ใส่ path ของไฟล์ PNG
+  qrCodeImage.style.display = 'block';
+}
 
     form.addEventListener('input', updatePrice);
 
