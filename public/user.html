@@ -464,21 +464,29 @@
     let selectedSlip = null;
 
   function updatePrice() {
-  const color = form.color.value;
+  const color = form.color.value; // หรือ document.getElementById('color').value
   const copies = parseInt(copiesInput.value, 10) || 0;
   const pack = parseInt(document.getElementById('pack').value, 10) || 1;
-  const pricePer = order.color === 'color' ? 10 : 1;
-  order.totalPrice = order.copies * order.pack * pricePer;
-  
+
+  // กำหนดราคาต่อแผ่น
+  const pricePer = color === 'color' ? 10 : 1;
+
+  // คำนวณราคารวม
+  const totalPrice = copies * pack * pricePer;
+
+  const priceSummary = document.getElementById('priceSummary');
+  const paymentSection = document.getElementById('paymentSection');
+  const paymentAmount = document.getElementById('paymentAmount');
+
   if (copies && pricePer) {
     priceSummary.textContent = `ราคารวม: ${totalPrice} บาท`;
     priceSummary.style.background = '#e8f5e8';
     priceSummary.style.color = '#2e7d32';
-    
+
     paymentSection.style.display = 'block';
     paymentAmount.textContent = totalPrice;
     generateQRCode(totalPrice);
-    
+
     document.getElementById('step1').className = 'step completed';
     document.getElementById('step2').className = 'step active';
   } else {
@@ -486,7 +494,7 @@
     priceSummary.style.background = '#f8f9fa';
     priceSummary.style.color = '#1e88e5';
     paymentSection.style.display = 'none';
-    
+
     document.getElementById('step1').className = 'step active';
     document.getElementById('step2').className = 'step inactive';
   }
