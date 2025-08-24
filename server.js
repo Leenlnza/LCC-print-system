@@ -15,18 +15,21 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123"
 // Order Schema
 const orderSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  lineId: { type: String, trim: true, default: "" }, // <-- เพิ่ม Line ID
   major: { type: String, required: true },
   time: { type: String, required: true },
   color: { type: String, required: true },
   copies: { type: Number, required: true },
+  pack: { type: Number, required: true, min: 1, default: 1 },
+  note: { type: String, trim: true, default: "" },
   price: { type: Number, required: true },
   totalPrice: { type: Number, required: true },
   fileData: { type: String, required: true },
   fileType: { type: String, required: true },
   fileName: { type: String, required: true },
-  slipData: { type: String, required: true }, // เพิ่มฟิลด์สลิป
-  slipType: { type: String, required: true }, // เพิ่มประเภทไฟล์สลิป
-  slipName: { type: String, required: true }, // เพิ่มชื่อไฟล์สลิป
+  slipData: { type: String, required: true },
+  slipType: { type: String, required: true },
+  slipName: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 })
 
@@ -113,7 +116,7 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      const { name, major, time, color, copies } = req.body
+      const { name, major, time, color, copies, lineId = "", pack = 1, note = "" } = req.body
       const file = req.files["file"][0]
       const slip = req.files["slip"][0]
 
@@ -133,20 +136,23 @@ app.post(
       const totalPrice = Number.parseInt(copies) * pricePerCopy
 
       const order = new Order({
-        name,
-        major,
-        time,
-        color,
-        copies: Number.parseInt(copies),
-        price: pricePerCopy,
-        totalPrice,
-        fileData: `data:${file.mimetype};base64,${fileData}`,
-        fileType: file.mimetype,
-        fileName: file.originalname,
-        slipData: `data:${slip.mimetype};base64,${slipData}`,
-        slipType: slip.mimetype,
-        slipName: slip.originalname,
-      })
+  name,
+  lineId,                 // <-- เพิ่มตรงนี้
+  major,
+  time,
+  color,
+  copies: Number.parseInt(copies),
+  pack: Number.parseInt(pack), // <-- เพิ่มตรงนี้
+  note,                     // <-- เพิ่มตรงนี้
+  price: pricePerCopy,
+  totalPrice,
+  fileData: `data:${file.mimetype};base64,${fileData}`,
+  fileType: file.mimetype,
+  fileName: file.originalname,
+  slipData: `data:${slip.mimetype};base64,${slipData}`,
+  slipType: slip.mimetype,
+  slipName: slip.originalname,
+})
 
       await order.save()
       console.log(`✅ New order created: ${name} - ${file.originalname} (with payment slip)`)

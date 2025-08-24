@@ -358,6 +358,8 @@
     <form id="orderForm">
       <label for="name">ชื่อ - นามสกุล</label>
       <input type="text" id="name" required placeholder="กรอกชื่อ-นามสกุล" />
+      <label for="lineId">Line ID</label>
+      <input type="text" id="lineId" placeholder="กรอก Line ID" />
       
       <label for="major">สาขาที่เรียน</label>
       <select id="major" required>
@@ -397,6 +399,10 @@
 
       <label for="copies">จำนวนแผ่น</label>
       <input type="number" id="copies" value="1" min="1" required />
+      <label for="pack">จำนวนชุด</label>
+      <input type="number" id="pack" value="1" min="1" required />
+      <label for="note">หมายเหตุ (ถ้ามี)</label>
+      <input type="text" id="note" placeholder="เช่น จัดเรียงหน้ากระดาษแบบ duplex" />
 
       <div class="summary" id="priceSummary">ราคารวม: - บาท</div>
 
@@ -457,36 +463,34 @@
 
     let selectedSlip = null;
 
-    function updatePrice() {
-      const color = form.color.value;
-      const copies = parseInt(copiesInput.value, 10) || 0;
-      const pricePer = color === 'color' ? 10 : color === 'bw' ? 1 : 0;
-      const totalPrice = copies * pricePer;
-      
-      if (copies && pricePer) {
-        priceSummary.textContent = `ราคารวม: ${totalPrice} บาท`;
-        priceSummary.style.background = '#e8f5e8';
-        priceSummary.style.color = '#2e7d32';
-        
-        // Show payment section and generate QR code
-        paymentSection.style.display = 'block';
-        paymentAmount.textContent = totalPrice;
-        generateQRCode(totalPrice);
-        
-        // Update step indicator
-        document.getElementById('step1').className = 'step completed';
-        document.getElementById('step2').className = 'step active';
-      } else {
-        priceSummary.textContent = 'ราคารวม: - บาท';
-        priceSummary.style.background = '#f8f9fa';
-        priceSummary.style.color = '#1e88e5';
-        paymentSection.style.display = 'none';
-        
-        // Reset step indicator
-        document.getElementById('step1').className = 'step active';
-        document.getElementById('step2').className = 'step inactive';
-      }
-    }
+  function updatePrice() {
+  const color = form.color.value;
+  const copies = parseInt(copiesInput.value, 10) || 0;
+  const pack = parseInt(document.getElementById('pack').value, 10) || 1;
+  const pricePer = order.color === 'color' ? 10 : 1;
+  order.totalPrice = order.copies * order.pack * pricePer;
+  
+  if (copies && pricePer) {
+    priceSummary.textContent = `ราคารวม: ${totalPrice} บาท`;
+    priceSummary.style.background = '#e8f5e8';
+    priceSummary.style.color = '#2e7d32';
+    
+    paymentSection.style.display = 'block';
+    paymentAmount.textContent = totalPrice;
+    generateQRCode(totalPrice);
+    
+    document.getElementById('step1').className = 'step completed';
+    document.getElementById('step2').className = 'step active';
+  } else {
+    priceSummary.textContent = 'ราคารวม: - บาท';
+    priceSummary.style.background = '#f8f9fa';
+    priceSummary.style.color = '#1e88e5';
+    paymentSection.style.display = 'none';
+    
+    document.getElementById('step1').className = 'step active';
+    document.getElementById('step2').className = 'step inactive';
+  }
+}
 
     function generateQRCode(amount) {
       // Generate PromptPay QR Code
@@ -540,28 +544,30 @@
     });
 
     form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Check if slip is uploaded
-      if (!selectedSlip) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาแนบสลิปการโอนเงิน',
-          text: 'คุณต้องแนบสลิปการโอนเงินก่อนส่งคำสั่งปริ้น',
-          confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#f59e0b'
-        });
-        return;
-      }
-      
-      const formData = new FormData();
-      formData.append('name', document.getElementById('name').value);
-      formData.append('major', document.getElementById('major').value);
-      formData.append('time', document.getElementById('time').value);
-      formData.append('color', form.color.value);
-      formData.append('copies', copiesInput.value);
-      formData.append('file', fileInput.files[0]);
-      formData.append('slip', selectedSlip);
+  e.preventDefault();
+  
+  if (!selectedSlip) {
+    await Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาแนบสลิปการโอนเงิน',
+      text: 'คุณต้องแนบสลิปการโอนเงินก่อนส่งคำสั่งปริ้น',
+      confirmButtonText: 'ตกลง',
+      confirmButtonColor: '#f59e0b'
+    });
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('name', document.getElementById('name').value);
+  formData.append('lineId', document.getElementById('lineId').value); // <-- เพิ่ม Line ID
+  formData.append('major', document.getElementById('major').value);
+  formData.append('time', document.getElementById('time').value);
+  formData.append('color', form.color.value);
+  formData.append('copies', copiesInput.value);
+  formData.append('pack', document.getElementById('pack').value); // <-- เพิ่ม Pack
+  formData.append('note', document.getElementById('note').value); // <-- เพิ่ม Note
+  formData.append('file', fileInput.files[0]);
+  formData.append('slip', selectedSlip);
 
       loading.style.display = 'block';
       submitBtn.disabled = true;

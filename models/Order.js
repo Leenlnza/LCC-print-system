@@ -1,10 +1,15 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     trim: true,
+  },
+  lineId: {            // <-- เพิ่ม Line ID
+    type: String,
+    trim: true,
+    default: "",
   },
   major: {
     type: String,
@@ -27,12 +32,13 @@ const orderSchema = new mongoose.Schema({
     min: 1,
     default: 1,
   },
-  pack: {
-    type: Number,
-    required: true,
-    min: 1,
-    default: 1,
-  },
+  pack: { 
+  type: Number, 
+  required: true, 
+  min: 1, 
+  default: 1,
+  set: v => Number(v)  // แปลงเป็น number ทุกครั้ง
+},
   price: {
     type: Number,
     required: true,
@@ -40,6 +46,11 @@ const orderSchema = new mongoose.Schema({
   totalPrice: {
     type: Number,
     required: true,
+  },
+  note: {              // <-- เพิ่มหมายเหตุ
+    type: String,
+    trim: true,
+    default: "",
   },
   fileUrl: {
     type: String,
@@ -62,6 +73,6 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-})
+});
 
-module.exports = mongoose.model("Order", orderSchema)
+module.exports = mongoose.model("Order", orderSchema);

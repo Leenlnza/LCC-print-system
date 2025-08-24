@@ -877,57 +877,55 @@
 
     // Load orders function
     async function loadOrders() {
-      const token = checkAuth();
-      if (!token) return;
+  const token = checkAuth();
+  if (!token) return;
 
-      try {
-        console.log('Loading orders...');
-        loadingState.style.display = 'block';
-        
-        const response = await fetch('/api/orders', {
-          headers: getAuthHeaders()
-        });
-        
-        console.log('Response status:', response.status);
-        
-        if (response.status === 401) {
-          console.log('Unauthorized, removing token');
-          localStorage.removeItem('adminToken');
-          authError.style.display = 'block';
-          adminContent.style.display = 'none';
-          return;
-        }
+  try {
+    loadingState.style.display = 'block';
+    const response = await fetch('/api/orders', {
+      headers: getAuthHeaders()
+    });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Orders loaded:', data.length, 'orders');
-        
-        allOrders = data;
-        filteredOrders = [...allOrders];
-        
-        updateStats(allOrders);
-        renderOrders(filteredOrders);
-        
-      } catch (error) {
-        console.error('Error loading orders:', error);
-        ordersContainer.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">⚠️</div>
-            <h3>เกิดข้อผิดพลาด</h3>
-            <p>ไม่สามารถโหลดข้อมูลได้: ${error.message}</p>
-            <button class="control-btn" onclick="loadOrders()" style="margin-top: 1rem;">
-              <i class="fas fa-retry"></i>
-              ลองใหม่
-            </button>
-          </div>
-        `;
-      } finally {
-        loadingState.style.display = 'none';
-      }
+    if (response.status === 401) {
+      localStorage.removeItem('adminToken');
+      authError.style.display = 'block';
+      adminContent.style.display = 'none';
+      return;
     }
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    const data = await response.json();
+
+    allOrders = data;
+
+    // ← ใส่ตรงนี้ก่อน updateStats และ renderOrders
+    allOrders.forEach(order => {
+      const pricePerSheet = order.price || (order.color === 'color' ? 10 : 1);
+      order.totalPrice = pricePerSheet * (order.copies || 0) * (order.pack || 1);
+    });
+
+    filteredOrders = [...allOrders];
+
+    updateStats(allOrders);
+    renderOrders(filteredOrders);
+
+  } catch (error) {
+    ordersContainer.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>เกิดข้อผิดพลาด</h3>
+        <p>ไม่สามารถโหลดข้อมูลได้: ${error.message}</p>
+        <button class="control-btn" onclick="loadOrders()" style="margin-top: 1rem;">
+          <i class="fas fa-retry"></i>
+          ลองใหม่
+        </button>
+      </div>
+    `;
+  } finally {
+    loadingState.style.display = 'none';
+  }
+}
 
     // Update statistics
     function updateStats(orders) {
@@ -1053,70 +1051,94 @@
               `}
 
               <!-- Order Details -->
-              <div class="order-details">
-                <div class="detail-item">
-                  <i class="fas fa-user detail-icon"></i>
-                  <span class="detail-label">ชื่อ:</span>
-                  <span class="detail-value">${order.name || 'ไม่ระบุ'}</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-graduation-cap detail-icon"></i>
-                  <span class="detail-label">สาขา:</span>
-                  <span class="detail-value">${order.major || 'ไม่ระบุ'}</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-clock detail-icon"></i>
-                  <span class="detail-label">เวลา:</span>
-                  <span class="detail-value">${order.time || 'ไม่ระบุ'} น.</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-print detail-icon"></i>
-                  <span class="detail-label">ประเภท:</span>
-                  <span class="type-badge ${order.color}">
-                    ${order.color === 'color' ? '🎨 สี' : '⚫ ขาวดำ'}
-                    (${order.price || 0} บาท/แผ่น)
-                  </span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-copy detail-icon"></i>
-                  <span class="detail-label">จำนวน:</span>
-                  <span class="detail-value">${order.copies || 0} แผ่น</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-money-bill-wave detail-icon"></i>
-                  <span class="detail-label">รวม:</span>
-                  <span class="detail-value price-highlight">${order.totalPrice || 0} บาท</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-file detail-icon"></i>
-                  <span class="detail-label">ไฟล์:</span>
-                  <span class="detail-value">${order.fileName || 'ไม่ระบุ'}</span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-credit-card detail-icon"></i>
-                  <span class="detail-label">การชำระ:</span>
-                  <span class="payment-badge">
-                    <i class="fas fa-${hasSlip ? 'check-circle' : 'exclamation-triangle'}"></i>
-                    ${hasSlip ? 'ชำระแล้ว' : 'ไม่มีสลิป'}
-                  </span>
-                </div>
-                
-                <div class="detail-item">
-                  <i class="fas fa-info-circle detail-icon"></i>
-                  <span class="detail-label">สถานะ:</span>
-                  <span class="status-badge">
-                    <i class="fas fa-hourglass-half"></i>
-                    รอดำเนินการ
-                  </span>
-                </div>
-              </div>
+       <div class="order-details">
+  <div class="detail-item">
+    <i class="fas fa-user detail-icon"></i>
+    <span class="detail-label">ชื่อ:</span>
+    <span class="detail-value">${order.name || 'ไม่ระบุ'}</span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-graduation-cap detail-icon"></i>
+    <span class="detail-label">สาขา:</span>
+    <span class="detail-value">${order.major || 'ไม่ระบุ'}</span>
+  </div>
+
+    <div class="detail-item">
+    <i class="fab fa-line detail-icon"></i>
+    <span class="detail-label">LINE ID:</span>
+    <span class="detail-value">${order.lineId || '-'}</span>
+  </div>
+  
+  <div class="detail-item">
+    <i class="fas fa-clock detail-icon"></i>
+    <span class="detail-label">เวลา:</span>
+    <span class="detail-value">${order.time || 'ไม่ระบุ'} น.</span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-print detail-icon"></i>
+    <span class="detail-label">ประเภท:</span>
+    <span class="type-badge ${order.color}">
+      ${order.color === 'color' ? '🎨 สี' : '⚫ ขาวดำ'}
+      (${order.price || 0} บาท/แผ่น × ${order.pack || 1} ชุด)
+    </span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-copy detail-icon"></i>
+    <span class="detail-label">จำนวน:</span>
+    <span class="detail-value">${order.copies || 0} แผ่น</span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-money-bill-wave detail-icon"></i>
+    <span class="detail-label">รวม:</span>
+    <span class="detail-value price-highlight">${order.totalPrice || 0} บาท</span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-file detail-icon"></i>
+    <span class="detail-label">ไฟล์:</span>
+    <span class="detail-value">${order.fileName || 'ไม่ระบุ'}</span>
+  </div>
+
+  <div class="detail-item">
+  <i class="fas fa-box detail-icon"></i>
+  <span class="detail-label">ชุด:</span>
+  <span class="detail-value">${order.pack || '-'}</span>
+</div>
+
+  <div class="detail-item">
+  <i class="fas fa-sticky-note detail-icon"></i>
+  <span class="detail-label">หมายเหตุ:</span>
+  <span class="detail-value">${order.note || '-'}</span>
+</div>
+
+  <div class="detail-item">
+    <i class="fas fa-id-badge detail-icon"></i>
+    <span class="detail-label">ID:</span>
+    <span class="detail-value">${order._id}</span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-credit-card detail-icon"></i>
+    <span class="detail-label">การชำระ:</span>
+    <span class="payment-badge">
+      <i class="fas fa-${hasSlip ? 'check-circle' : 'exclamation-triangle'}"></i>
+      ${hasSlip ? 'ชำระแล้ว' : 'ไม่มีสลิป'}
+    </span>
+  </div>
+
+  <div class="detail-item">
+    <i class="fas fa-info-circle detail-icon"></i>
+    <span class="detail-label">สถานะ:</span>
+    <span class="status-badge">
+      <i class="fas fa-hourglass-half"></i>
+      รอดำเนินการ
+    </span>
+  </div>
+</div>
 
               <!-- Order Actions -->
               <div class="order-actions">
