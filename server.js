@@ -2,6 +2,7 @@ const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 const multer = require("multer")
+const fs = require("fs");
 const path = require("path")
 require("dotenv").config()
 
@@ -31,6 +32,12 @@ const orderSchema = new mongoose.Schema({
   slipType: { type: String, required: true },
   slipName: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+   printConfirmations: [
+    {
+      admin: String,
+      date: { type: Date, default: Date.now }
+    }
+  ]
 })
 
 const Order = mongoose.model("Order", orderSchema)
@@ -205,6 +212,36 @@ app.patch("/api/orders/:id", checkAdminAuth, async (req, res) => {
     res.status(500).json({ error: error.message })
   }
 })
+
+app.post("/api/orders/:id/confirm-print", checkAdminAuth, async (req, res) => {
+  const orderId = req.params.id;
+  const { admin } = req.body;
+
+  if (!admin || admin.trim() === "") {
+    return res.status(400).json({ message: "ต้องระบุชื่อ admin" });
+  }
+
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+
+    // เพิ่มการยืนยันการพิมพ์
+    order.printConfirmations.push({ admin, date: new Date() });
+    await order.save();
+
+    // สร้างโฟลเดอร์บน filesystem
+    const folderPath = path.join(__dirname, "prints", orderId);
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+      console.log(`📁 Folder created: ${folderPath}`);
+    }
+
+    res.json({ message: "ยืนยันการพิมพ์เรียบร้อย และสร้างโฟลเดอร์บน server แล้ว" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)

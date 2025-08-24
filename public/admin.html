@@ -1142,20 +1142,68 @@
 
               <!-- Order Actions -->
               <div class="order-actions">
-                <button class="action-btn" onclick="deleteOrder('${order._id}')">
-                  <i class="fas fa-trash"></i>
-                  ลบ
-                </button>
-                <div class="order-time">
-                  <i class="fas fa-calendar-alt"></i>
-                  ${new Date(order.createdAt).toLocaleString('th-TH')}
-                </div>
-              </div>
-            </div>
-          </div>
+  <button class="action-btn" onclick="deleteOrder('${order._id}')">
+    <i class="fas fa-trash"></i>
+    ลบ
+  </button>
+  <button class="control-btn success" style="margin-top: 0.5rem;" onclick="confirmPrinted('${order._id}')">
+    <i class="fas fa-check"></i>
+    ยืนยันพิมพ์แล้ว
+  </button>
+  <div class="order-time">
+    <i class="fas fa-calendar-alt"></i>
+    ${new Date(order.createdAt).toLocaleString('th-TH')}
+  </div>
+  <div id="printedBy-${order._id}" style="margin-top: 0.3rem; font-size: 0.8rem; color: #059669;">
+    ${order.printedBy ? `พิมพ์โดย: ${order.printedBy}` : ''}
+  </div>
+</div>
         `;
       }).join('');
+      
     }
+    // ฟังก์ชันยืนยันการพิมพ์
+async function confirmPrinted(orderId) {
+  const { value: adminName } = await Swal.fire({
+    title: 'ยืนยันการพิมพ์',
+    input: 'text',
+    inputLabel: 'กรุณากรอกชื่อผู้พิมพ์',
+    inputPlaceholder: 'เช่น น.ส.สมหญิง',
+    showCancelButton: true,
+    confirmButtonText: 'ยืนยัน',
+    cancelButtonText: 'ยกเลิก',
+    inputValidator: (value) => {
+      if (!value) return 'กรุณากรอกชื่อ';
+      return null;
+    }
+  });
+
+  if (adminName) {
+    // อัปเดตใน object front-end
+    const order = allOrders.find(o => o._id === orderId);
+    if (order) {
+      order.printedBy = adminName;
+    }
+
+    // แสดงชื่อบนหน้าจอ
+    const printedDiv = document.getElementById(`printedBy-${orderId}`);
+    if (printedDiv) {
+      printedDiv.textContent = `พิมพ์โดย: ${adminName}`;
+    }
+
+    Swal.fire({
+      title: 'ยืนยันเรียบร้อย',
+      text: `รายการนี้ถูกทำเครื่องหมายว่าพิมพ์แล้วโดย ${adminName}`,
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    // TODO: ถ้า backend มี endpoint update order สามารถส่ง POST/PUT อัปเดตด้วย
+    // await fetch(`/api/orders/${orderId}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ printedBy: adminName }) });
+  }
+}
+
 
     // Delete order function
     async function deleteOrder(orderId) {
@@ -1194,7 +1242,7 @@
         await Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
       }
     }
-
+    
     // Download file function
     function downloadFile(dataUrl, filename) {
       try {
